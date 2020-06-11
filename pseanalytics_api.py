@@ -25,7 +25,7 @@ filters = ['<td class="table-info">','<td>','</td>','<td class="table-danger">',
 # delimiter used for the datapoints
 delimiter = "</td>" 
 # columns used for dataframe 
-df_columns - ['stock','date','close','change','pchange','open','low','high','volume','netforeign']
+df_columns = ['stock','date','close','change','pchange','open','low','high','volume','netforeign']
 #----------------------------------------------------------------------------
 
 # Adjust the units present in some datapoints
