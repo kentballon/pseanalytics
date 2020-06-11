@@ -10,18 +10,25 @@
 # kentballon@gmail.com
 # 
 #----------------------------------------------------------------------------
+# Imports
 import os
 import pandas as pd
 import numpy as np
 from datetime import datetime
 
+#----------------------------------------------------------------------------
+# Global Variables
 # defining the api-endpoint  
 api_endpoint = "https://www.investagrams.com/Stock/"
 # filters for data from web scrape
 filters = ['<td class="table-info">','<td>','</td>','<td class="table-danger">','<td class="table-success">','<td,class="table-warning">','<td class="table-warning">','\r',',']
 # delimiter used for the datapoints
 delimiter = "</td>" 
+# columns used for dataframe 
+df_columns - ['stock','date','close','change','pchange','open','low','high','volume','netforeign']
+#----------------------------------------------------------------------------
 
+# Adjust the units present in some datapoints
 def post_fix_correction(string):
     retval = string
 
@@ -34,6 +41,7 @@ def post_fix_correction(string):
 
     return retval
 
+# Compute the RSI
 def get_rsi(data, time_window):
     # reference: https://tcoil.info/compute-rsi-for-stocks-with-python-relative-strength-index/
     diff = data.diff(1).dropna()        # diff in one field(one day)
@@ -59,6 +67,7 @@ def get_rsi(data, time_window):
     rsi = 100 - 100/(1+rs)
     return rsi
 
+# Main function to pull stock data
 def get_stock_data(stock,start_date="2020-01-02",end_date="2020-01-02"):
 
     # get all stock data available
@@ -94,7 +103,7 @@ def get_stock_data(stock,start_date="2020-01-02",end_date="2020-01-02"):
             data.insert(0,list_entry)
     
     # create dataframe
-    df = pd.DataFrame(data, columns=['stock','date','close','change','pchange','open','low','high','volume','netforeign'])
+    df = pd.DataFrame(data, columns=df_columns)
 
     # format all columns as float except for date
     for col in df.columns:
