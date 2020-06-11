@@ -16,10 +16,15 @@ from datetime import datetime
 # defining the api-endpoint  
 api_endpoint = "https://www.investagrams.com/Stock/"
 # filters for data from web scrape
-filters = ['<td class="table-info">','<td>','</td>','<td class="table-danger">','<td class="table-success">','<td,class="table-warning">','<td class="table-warning">','\r']
+filters = ['<td class="table-info">','<td>','</td>','<td class="table-danger">','<td class="table-success">','<td,class="table-warning">','<td class="table-warning">','\r',',']
 
 def post_fix_correction(string):
     retval = string
+
+    if "B" in string:
+        string = string.replace("B","")
+        retval = float(string) * 1000000000 
+
     if "M" in string:
         string = string.replace("M","")
         retval = float(string) * 1000000 
@@ -31,6 +36,7 @@ def post_fix_correction(string):
     if "%" in string:
         string = string.replace("%","")
         retval = string
+
     return retval
 
 def get_rsi(data, time_window):
@@ -81,37 +87,39 @@ def get_stock_data(stock,start_date="2020-01-02",end_date="2020-01-02"):
             list_entry = entry.split("|")[:-1]
             dt_string = list_entry[0]
             # format date
-            list_entry[0] = datetime.strptime(dt_string, "%b %d, %Y")
+            list_entry[0] = datetime.strptime(dt_string, "%b %d %Y")
             # format pchange 
             list_entry[3] = post_fix_correction(list_entry[3])
             # format volume
             list_entry[7] = post_fix_correction(list_entry[7])
             # format netforeign
             list_entry[8] = post_fix_correction(list_entry[8])
+            # add stock code
+            list_entry.insert(0,stock)
             data.insert(0,list_entry)
     
     # create dataframe
-    df = pd.DataFrame(data, columns=['date','close','change','pchange','open','low','high','volume','netforeign'])
+    df = pd.DataFrame(data, columns=['stock','date','close','change','pchange','open','low','high','volume','netforeign'])
 
     # format all columns as float except for date
     for col in df.columns:
-        if not (col== "date"):
+        if not (col in ("date","stock")):
             df[col] = df[col].astype(float)
 
     # set date as search index
     df = df.set_index(['date'])
 
     # calculate EMA
-    df['9ema'] = df.iloc[:,0].ewm(span=9,adjust=False).mean()
-    df['12ema'] = df.iloc[:,0].ewm(span=12,adjust=False).mean()
-    df['20ema'] = df.iloc[:,0].ewm(span=20,adjust=False).mean()
-    df['26ema'] = df.iloc[:,0].ewm(span=26,adjust=False).mean()
-    df['50ema'] = df.iloc[:,0].ewm(span=50,adjust=False).mean()
-    df['100ema'] = df.iloc[:,0].ewm(span=100,adjust=False).mean()
+    df['9ema'] = df.iloc[:,1].ewm(span=9,adjust=False).mean()
+    df['12ema'] = df.iloc[:,1].ewm(span=12,adjust=False).mean()
+    df['20ema'] = df.iloc[:,1].ewm(span=20,adjust=False).mean()
+    df['26ema'] = df.iloc[:,1].ewm(span=26,adjust=False).mean()
+    df['50ema'] = df.iloc[:,1].ewm(span=50,adjust=False).mean()
+    df['100ema'] = df.iloc[:,1].ewm(span=100,adjust=False).mean()
     
     # calculate MACD
     df['macd'] = df['12ema'] - df['26ema']
-    df['macd_signal'] = df.iloc[:,14].ewm(span=9,adjust=False).mean()
+    df['macd_signal'] = df.iloc[:,15].ewm(span=9,adjust=False).mean()
 
     # calculate RSI
     df['rsi'] = get_rsi(df['close'],14)
