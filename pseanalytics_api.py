@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 #----------------------------------------------------------------------------
-# investa_api.py
+# pseanalytics_api.py.py
 # 
 # Module containing all common methods for pulling Stock data from
 # https://www.investagrams.com/Stock
+# 
+# get_stock_data - generates dataframe for a give stock for a given duration
 # 
 # kentballon@gmail.com
 # 
@@ -17,25 +19,18 @@ from datetime import datetime
 api_endpoint = "https://www.investagrams.com/Stock/"
 # filters for data from web scrape
 filters = ['<td class="table-info">','<td>','</td>','<td class="table-danger">','<td class="table-success">','<td,class="table-warning">','<td class="table-warning">','\r',',']
+# delimiter used for the datapoints
+delimiter = "</td>" 
 
 def post_fix_correction(string):
     retval = string
 
-    if "B" in string:
-        string = string.replace("B","")
-        retval = float(string) * 1000000000 
+    correction = {"B":1000000000,"M":1000000,"K":1000,"%":1}
 
-    if "M" in string:
-        string = string.replace("M","")
-        retval = float(string) * 1000000 
-     
-    if "K" in string:
-        string = string.replace("K","")
-        retval = float(string) * 1000
-
-    if "%" in string:
-        string = string.replace("%","")
-        retval = string
+    for keys in correction:
+        if keys in string:
+            string = string.replace(keys,"")
+            retval = float(string) * correction[keys] 
 
     return retval
 
@@ -73,7 +68,7 @@ def get_stock_data(stock,start_date="2020-01-02",end_date="2020-01-02"):
 
     # remove filter words
     for f in filters:
-        if (f == "</td>"):
+        if (f == delimiter ):
           output = output.replace(f,"|")
         else:
           output = output.replace(f,"")
