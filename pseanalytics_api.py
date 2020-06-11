@@ -9,7 +9,8 @@
 # 
 #----------------------------------------------------------------------------
 import os
-import pandas
+import pandas as pd
+import numpy as np
 from datetime import datetime
 
 # defining the api-endpoint  
@@ -31,6 +32,31 @@ def post_fix_correction(string):
         string = string.replace("%","")
         retval = string
     return retval
+
+def get_rsi(data, time_window):
+    # reference: https://tcoil.info/compute-rsi-for-stocks-with-python-relative-strength-index/
+    diff = data.diff(1).dropna()        # diff in one field(one day)
+
+    #this preservers dimensions off diff values
+    up_chg = 0 * diff
+    down_chg = 0 * diff
+    
+    # up change is equal to the positive difference, otherwise equal to zero
+    up_chg[diff > 0] = diff[ diff>0 ]
+    
+    # down change is equal to negative deifference, otherwise equal to zero
+    down_chg[diff < 0] = diff[ diff < 0 ]
+    
+    # check pandas documentation for ewm
+    # https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.ewm.html
+    # values are related to exponential decay
+    # we set com=time_window-1 so we get decay alpha=1/time_window
+    up_chg_avg   = up_chg.ewm(com=time_window-1 , min_periods=time_window).mean()
+    down_chg_avg = down_chg.ewm(com=time_window-1 , min_periods=time_window).mean()
+    
+    rs = abs(up_chg_avg/down_chg_avg)
+    rsi = 100 - 100/(1+rs)
+    return rsi
 
 def get_stock_data(stock,start_date="2020-01-02",end_date="2020-01-02"):
 
@@ -63,13 +89,34 @@ def get_stock_data(stock,start_date="2020-01-02",end_date="2020-01-02"):
             # format netforeign
             list_entry[8] = post_fix_correction(list_entry[8])
             data.insert(0,list_entry)
-
+    
     # create dataframe
-    df = pandas.DataFrame(data, columns=['date','close','change','pchange','open','low','high','volume','netforeign'])
+    df = pd.DataFrame(data, columns=['date','close','change','pchange','open','low','high','volume','netforeign'])
+
+    # format all columns as float except for date
+    for col in df.columns:
+        if not (col== "date"):
+            df[col] = df[col].astype(float)
+
     # set date as search index
     df = df.set_index(['date'])
+
+    # calculate EMA
+    df['9ema'] = df.iloc[:,0].ewm(span=9,adjust=False).mean()
+    df['12ema'] = df.iloc[:,0].ewm(span=12,adjust=False).mean()
+    df['20ema'] = df.iloc[:,0].ewm(span=20,adjust=False).mean()
+    df['26ema'] = df.iloc[:,0].ewm(span=26,adjust=False).mean()
+    df['50ema'] = df.iloc[:,0].ewm(span=50,adjust=False).mean()
+    df['100ema'] = df.iloc[:,0].ewm(span=100,adjust=False).mean()
+    
+    # calculate MACD
+    df['macd'] = df['12ema'] - df['26ema']
+    df['macd_signal'] = df.iloc[:,14].ewm(span=9,adjust=False).mean()
+
+    # calculate RSI
+    df['rsi'] = get_rsi(df['close'],14)
+ 
     # limit dataframe to date range
-    #retdf = df.loc[end_date:start_date]
     retdf = df.loc[start_date:end_date]
     # reset the index
     retdf = retdf.reset_index()
