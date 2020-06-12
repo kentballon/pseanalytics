@@ -22,7 +22,7 @@ else:
     csv_file_name = 'lists/code_list_test.txt'
     report_date = report_date.strftime("%Y-%m-%d")
 
-res = strategies.macd_crossing(csv_file_name,report_date,trendfac=3)
+res = strategies.rsi_oversold(csv_file_name,report_date,trendfac=1)
 df = res.get_stock_data()
 
 print df
