@@ -23,3 +23,4 @@
 ## Screeners 
 <sup>`*` Currently under development. <sup>
 1. Three White Soldiers
+2. MACD Crossing
