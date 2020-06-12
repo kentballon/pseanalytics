@@ -28,6 +28,10 @@ delimiter = "</td>"
 df_columns = ['stock','date','close','change','pchange','open','low','high','volume','netforeign']
 #----------------------------------------------------------------------------
 
+def get_uniq_stock_keys(df):
+  keys = df['stock'].unique()
+  return keys
+
 # Adjust the units present in some datapoints
 def post_fix_correction(string):
     retval = string
@@ -40,6 +44,24 @@ def post_fix_correction(string):
             retval = float(string) * correction[keys] 
 
     return retval
+
+# Compute the Exponential Moving Averages
+def get_ema(df):
+    # calculate EMA
+    df['ema9'] = df.iloc[:,1].ewm(span=9,adjust=False).mean()
+    df['ema12'] = df.iloc[:,1].ewm(span=12,adjust=False).mean()
+    df['ema20'] = df.iloc[:,1].ewm(span=20,adjust=False).mean()
+    df['ema26'] = df.iloc[:,1].ewm(span=26,adjust=False).mean()
+    df['ema50'] = df.iloc[:,1].ewm(span=50,adjust=False).mean()
+    df['ema100'] = df.iloc[:,1].ewm(span=100,adjust=False).mean()
+    return df
+
+# Compute the MACD
+def get_macd(df):
+    # calculate MACD
+    df['macd'] = df['ema12'] - df['ema26']
+    df['macds'] = df.iloc[:,15].ewm(span=9,adjust=False).mean()
+    return df
 
 # Compute the RSI
 def get_rsi(data, time_window):
@@ -66,6 +88,20 @@ def get_rsi(data, time_window):
     rs = abs(up_chg_avg/down_chg_avg)
     rsi = 100 - 100/(1+rs)
     return rsi
+
+def get_candlestick(df):
+    # calculate candlestick patterns
+    # add open to head column
+    df['openh']= df['high'] - df['open']
+    # add close to head column
+    df['closeh']= df['high'] - df['close']
+    # add open to tail column
+    df['opent']= df['open'] - df['low']
+    # add close to tail column
+    df['closet']= df['close'] - df['low']
+    # add body column
+    df['body'] = abs(df['close'] - df['open'])
+    return df
 
 # Main function to pull stock data
 def get_stock_data(stock,start_date="2020-01-02",end_date="2020-01-02"):
@@ -114,25 +150,19 @@ def get_stock_data(stock,start_date="2020-01-02",end_date="2020-01-02"):
     df = df.set_index(['date'])
 
     # calculate EMA
-    df['9ema'] = df.iloc[:,1].ewm(span=9,adjust=False).mean()
-    df['12ema'] = df.iloc[:,1].ewm(span=12,adjust=False).mean()
-    df['20ema'] = df.iloc[:,1].ewm(span=20,adjust=False).mean()
-    df['26ema'] = df.iloc[:,1].ewm(span=26,adjust=False).mean()
-    df['50ema'] = df.iloc[:,1].ewm(span=50,adjust=False).mean()
-    df['100ema'] = df.iloc[:,1].ewm(span=100,adjust=False).mean()
-    
+    df = get_ema(df)
     # calculate MACD
-    df['macd'] = df['12ema'] - df['26ema']
-    df['macd_signal'] = df.iloc[:,15].ewm(span=9,adjust=False).mean()
-
+    df = get_macd(df)
     # calculate RSI
     df['rsi'] = get_rsi(df['close'],14)
- 
+    # calculate Candlestick patterns
+    df = get_candlestick(df) 
+     
     # limit dataframe to date range
-    retdf = df.loc[start_date:end_date]
+    df = df.loc[start_date:end_date]
     # reset the index
-    retdf = retdf.reset_index()
+    df = df.reset_index()
     # sort by date
-    retdf.sort_values(by=['date'], inplace=True, ascending=True)
+    df.sort_values(by=['date'], inplace=True, ascending=True)
 
-    return retdf 
+    return df 
