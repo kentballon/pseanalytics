@@ -1,6 +1,6 @@
 # pseanalytics
 
-**pseanalytics** is a tool that allows you to gather PSE stock data through web scraping. The purpose of this tool is to provide an easy API for monitoring PSE stock data and allow developers to create algorithms around basic stock indicators.
+**pseanalytics** is a module that allows you to gather PSE stock data through web scraping. The purpose of this module is to provide an easy API for monitoring PSE stock data and allow developers to create trading algorithms and screeners around basic stock indicators.
 
 ## Features
 1. Access historical stock data for up to the past year.
@@ -15,12 +15,13 @@
 6. high
 7. volume
 8. netforeign
-9. EMA
-10. MACD
-11. RSI
-12. candlestick 
+9. ema9, ema12, ema20, ema26, ema50, ema100
+10. macd, macds
+11. rsi
+12. openh, closeh, opent, opent, body 
 
 ## Screeners 
-<sup>`*` Currently under development. <sup>
-1. Three White Soldiers
-2. MACD Crossing
+<sup>`*` under construction <sup>
+1. three white soldiers
+2. macd rossing
+3. rsi oversold and overbought
