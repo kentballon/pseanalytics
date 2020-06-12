@@ -11,15 +11,15 @@
 import pandas as pd
 import sys
 import pseanalytics as pseapi
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 
 class whitesoldier:
 
-    def __init__(self,csv_file_name,trendfac = 3,resfac = 1,supfac = 1,pc_fac = 0,volfac1 = 1000000,volfac2 = 500000,volfac3 = 10000000,netffac = 0,pc_crit = 2,volfac_crit = 16,res_crit = 0,sup_crit = 0):
-        # ------------------------------------------------------------------------------------------------------
-        # Configuration Parameters
-        # ------------------------------------------------------------------------------------------------------
+    def __init__(self,csv_file_name,report_date,trendfac = 3,resfac = 1,supfac = 1,pc_fac = 0,volfac1 = 1000000,volfac2 = 500000,volfac3 = 10000000,netffac = 0,pc_crit = 2,volfac_crit = 16,res_crit = 0,sup_crit = 0):
+        # list of stock code to evaluate
         self.csv_file_name = csv_file_name
+        # date to evaluate
+        self.report_date = report_date
         # number of days to sample for the trend 
         self.trendfac = trendfac
         # adjust head factor relative to body 
@@ -34,13 +34,11 @@ class whitesoldier:
         self.volfac3 = volfac3
         # net foreign factor
         self.netffac = netffac
-        # ------------------------------------------------------------------------------------------------------
         # result criteria
         self.pc_crit = pc_crit 
         self.volfac_crit = (self.volfac1 + self.volfac2 + self.volfac3)/(self.volfac1)
         self.res_crit = res_crit 
         self.sup_crit = sup_crit 
-        # ------------------------------------------------------------------------------------------------------
     
     def get_whitesoldier_score(self,df, keys,trendfac,resfac,supfac,pc_fac,volfac1,volfac2,volfac3,netffac,pc_crit,volfac_crit,res_crit,sup_crit):
       # create dataframe for overall tally
@@ -127,7 +125,7 @@ class whitesoldier:
     
     def get_stock_data(self):
         df = pd.read_csv(self.csv_file_name)
-        report_date= date.today()
+        report_date = datetime.strptime(self.report_date, "%Y-%m-%d")
         report_date_n_days_ago = report_date - timedelta(days=self.trendfac)
         report_date = report_date.strftime("%Y-%m-%d")
         report_date_n_days_ago = report_date_n_days_ago.strftime("%Y-%m-%d")
@@ -144,3 +142,27 @@ class whitesoldier:
         filtered_df = self.get_whitesoldier_stocks(fulldata,filtered_keys,self.trendfac)
     
         return filtered_df, filtered_df_score
+
+class macd_crossing:
+    def __init__(self,csv_file_name,report_date,trendfac = 0):
+        # list of stock code to evaluate
+        self.csv_file_name = csv_file_name
+        # date to evaluate
+        self.report_date = report_date
+        # number of days to sample for the trend 
+        self.trendfac = trendfac
+
+    def get_stock_data(self):
+        df = pd.read_csv(self.csv_file_name)
+        report_date = datetime.strptime(self.report_date, "%Y-%m-%d")
+        report_date_n_days_ago = report_date - timedelta(days=self.trendfac)
+        report_date = report_date.strftime("%Y-%m-%d")
+        report_date_n_days_ago = report_date_n_days_ago.strftime("%Y-%m-%d")
+        fulldata=pd.DataFrame()
+        for stock in df['stock']:
+            data = pseapi.get_stock_data(stock,report_date_n_days_ago,self.report_date)
+            data = data.round(2)
+            filtered_df = data.loc[abs(data['macd'] - data['macds']) == 0]
+            fulldata = fulldata.append(filtered_df,ignore_index = True)
+
+        return fulldata
