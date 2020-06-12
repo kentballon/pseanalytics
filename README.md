@@ -4,8 +4,22 @@
 
 ## Features
 1. Access historical stock data for up to the past year.
-2. Identify potential stock trades based on stock indicators.
+2. Screen and identify potential stock trades based on stock indicators.
 
 ## Indicators
-*Note: Currently under development
+1. close
+2. change
+3. percent change
+4. open
+5. low
+6. high
+7. volume
+8. netforeign
+9. EMA
+10. MACD
+11. RSI
+12. candlestick 
+
+## Screeners 
+<sup>`*` Currently under development. <sup>
 1. Three White Soldiers
