@@ -38,32 +38,6 @@ gres_crit = 0
 gsup_crit = 0
 # ------------------------------------------------------------------------------------------------------
 
-def pre_process_dataframe(df):
-  # add percent change column
-  df['pchange']= (df['close'] - df['open'])/df['open']
-  # add open to head column
-  df['openhead']= df['high'] - df['open']
-  # add close to head column
-  df['closehead']= df['high'] - df['close']
-  # add open to tail column
-  df['opentail']= df['open'] - df['low']
-  # add close to tail column
-  df['closetail']= df['close'] - df['low']
-  # add body column
-  df['body'] = abs(df['close'] - df['open'])
-  # filter out unnecessary information
-  patternDel = "^\^"
-  filter = df['stock'].str.contains(patternDel)
-  df = df[~filter]
-  # sort stocks
-  sorted_df = df.sort_values(by=['stock'])
-  return sorted_df
-
-def gen_stock_keys(df):
-  # get unique stock keys
-  keys = df['stock'].unique()
-  return keys
-
 def get_whitesoldier_score(df, keys,trendfac,resfac,supfac,pc_fac,volfac_1,volfac_2,volfac_3,netffac,pc_crit,volfac_crit,res_crit,sup_crit):
   # create dataframe for overall tally
   df_score = pd.DataFrame(columns=['stock', 'volume_score', 'pchange_score','resistance_score','support_score','net_foreign_score'])
@@ -96,24 +70,24 @@ def get_whitesoldier_score(df, keys,trendfac,resfac,supfac,pc_fac,volfac_1,volfa
 
       # compute resistance criteria
       if (df_subset['pchange'][ind] > 0):
-        if (df_subset['closehead'][ind] >= (resfac * df_subset['body'][ind])):
+        if (df_subset['closeh'][ind] >= (resfac * df_subset['body'][ind])):
           resistance_score = resistance_score + 1
         #else:
         #  resistance_score = resistance_score - 1
       else:
-        if (df_subset['openhead'][ind] >= (resfac * df_subset['body'][ind])):
+        if (df_subset['openh'][ind] >= (resfac * df_subset['body'][ind])):
           resistance_score = resistance_score + 1
         #else:
         #  resistance_score = resistance_score - 1
 
       # compute support criteria
       if (df_subset['pchange'][ind] > 0):
-        if (df_subset['opentail'][ind] >= (supfac * df_subset['body'][ind])):
+        if (df_subset['opent'][ind] >= (supfac * df_subset['body'][ind])):
           support_score = support_score + 1
         #else:
         #  support_score = support_score - 1
       else:
-        if (df_subset['closetail'][ind] >= (supfac * df_subset['body'][ind])):
+        if (df_subset['closet'][ind] >= (supfac * df_subset['body'][ind])):
           support_score = support_score + 1
         #else:
         #  support_score = support_score - 1
@@ -163,10 +137,9 @@ def whitesoldiers(csv_file_name,trendfac=gtrendfac,resfac=gresfac,supfac=gsupfac
         else:
             fulldata = fulldata.append(data,ignore_index = True)
     
-    proc_df = pre_process_dataframe(fulldata)
-    keys = gen_stock_keys(proc_df)
-    filtered_df_score = get_whitesoldier_score(proc_df, keys,trendfac,resfac,supfac,pc_fac,volfac_1,volfac_2,volfac_3,netffac,pc_crit,volfac_crit,res_crit,sup_crit)
-    filtered_keys = gen_stock_keys(filtered_df_score)
+    keys = pseapi.get_uniq_stock_keys(fulldata)
+    filtered_df_score = get_whitesoldier_score(fulldata, keys,trendfac,resfac,supfac,pc_fac,volfac_1,volfac_2,volfac_3,netffac,pc_crit,volfac_crit,res_crit,sup_crit)
+    filtered_keys = pseapi.get_uniq_stock_keys(filtered_df_score)
     filtered_df = get_whitesoldier_stocks(fulldata,filtered_keys,trendfac)
 
     return filtered_df, filtered_df_score
