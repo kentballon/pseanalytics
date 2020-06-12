@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 
 import sys
-import pseanalytics_api as pseapi 
-import strategies
 import pandas as pd
 from datetime import date, timedelta
+from pseanalytics import *
 
 pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None)
@@ -16,7 +15,8 @@ if (len(sys.argv) > 1):
 else:
     csv_file_name = 'lists/code_list_test.txt'
 
-df, score = strategies.whitesoldiers(csv_file_name)
+ws = strategies.whitesoldier(csv_file_name,trendfac=4)
+df, score = ws.get_stock_data()
 
 print df
 print score
