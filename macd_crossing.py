@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
+import sys
 import pandas as pd
+from datetime import date, timedelta
 from pseanalytics import *
 
 pd.set_option('display.max_rows', None)
@@ -9,10 +11,11 @@ pd.set_option('display.width', None)
 pd.set_option('display.max_colwidth', -1)
 
 if (len(sys.argv) > 1):
-    stockID= sys.argv[1]
+    csv_file_name = sys.argv[1]
 else:
-    stockID="MPI"
+    csv_file_name = 'lists/code_list_test.txt'
 
-data = pseanalytics.get_stock_data(stockID,"2019-06-11","2020-06-11")
-data = data.round(2)
-print data
+res = strategies.macd_crossing(csv_file_name,'2020-06-11',trendfac=3)
+df = res.get_stock_data()
+
+print df

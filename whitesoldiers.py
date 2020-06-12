@@ -15,7 +15,7 @@ if (len(sys.argv) > 1):
 else:
     csv_file_name = 'lists/code_list_test.txt'
 
-ws = strategies.whitesoldier(csv_file_name,trendfac=4)
+ws = strategies.whitesoldier(csv_file_name,report_date='2020-06-11',trendfac=4)
 df, score = ws.get_stock_data()
 
 print df
