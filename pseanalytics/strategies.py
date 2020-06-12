@@ -166,3 +166,55 @@ class macd_crossing:
             fulldata = fulldata.append(filtered_df,ignore_index = True)
 
         return fulldata
+
+class rsi_oversold:
+    def __init__(self,csv_file_name,report_date,trendfac = 0, limit = 30):
+        # list of stock code to evaluate
+        self.csv_file_name = csv_file_name
+        # date to evaluate
+        self.report_date = report_date
+        # number of days to sample for the trend 
+        self.trendfac = trendfac
+        # oversold threshold
+        self.oversold = limit 
+
+    def get_stock_data(self):
+        df = pd.read_csv(self.csv_file_name)
+        report_date = datetime.strptime(self.report_date, "%Y-%m-%d")
+        report_date_n_days_ago = report_date - timedelta(days=self.trendfac)
+        report_date = report_date.strftime("%Y-%m-%d")
+        report_date_n_days_ago = report_date_n_days_ago.strftime("%Y-%m-%d")
+        fulldata=pd.DataFrame()
+        for stock in df['stock']:
+            data = pseapi.get_stock_data(stock,report_date_n_days_ago,self.report_date)
+            data = data.round(2)
+            filtered_df = data.loc[data['rsi'] <= self.oversold]
+            fulldata = fulldata.append(filtered_df,ignore_index = True)
+
+        return fulldata
+
+class rsi_overbought:
+    def __init__(self,csv_file_name,report_date,trendfac = 0, limit = 70):
+        # list of stock code to evaluate
+        self.csv_file_name = csv_file_name
+        # date to evaluate
+        self.report_date = report_date
+        # number of days to sample for the trend 
+        self.trendfac = trendfac
+        # oversold threshold
+        self.overbought = limit 
+
+    def get_stock_data(self):
+        df = pd.read_csv(self.csv_file_name)
+        report_date = datetime.strptime(self.report_date, "%Y-%m-%d")
+        report_date_n_days_ago = report_date - timedelta(days=self.trendfac)
+        report_date = report_date.strftime("%Y-%m-%d")
+        report_date_n_days_ago = report_date_n_days_ago.strftime("%Y-%m-%d")
+        fulldata=pd.DataFrame()
+        for stock in df['stock']:
+            data = pseapi.get_stock_data(stock,report_date_n_days_ago,self.report_date)
+            data = data.round(2)
+            filtered_df = data.loc[data['rsi'] >= self.overbought]
+            fulldata = fulldata.append(filtered_df,ignore_index = True)
+
+        return fulldata
