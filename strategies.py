@@ -114,11 +114,12 @@ def get_whitesoldier_score(df, keys,trendfac,resfac,supfac,pc_fac,volfac_1,volfa
   return df_score
     
 def get_whitesoldier_stocks(df, keys,trendfac):
-  for key in keys:
-    df_subset = df[df.stock == key]
-    df_subset = df_subset.tail(int(trendfac))
-    #df_subset = df_subset.sort_values(by=['date'])
-    print df_subset
+    retdf=pd.DataFrame()
+    for key in keys:
+      df_subset = df[df.stock == key]
+      df_subset = df_subset.tail(int(trendfac))
+      retdf = retdf.append(df_subset,ignore_index = True)
+    return retdf
 
 def whitesoldiers(csv_file_name,trendfac=gtrendfac,resfac=gresfac,supfac=gsupfac,pc_fac=gpc_fac,volfac_1=gvolfac_1,volfac_2=gvolfac_2,volfac_3=gvolfac_3,netffac=gnetffac,pc_crit=gpc_crit,volfac_crit=gvolfac_crit,res_crit=gres_crit,sup_crit=gsup_crit):
     df = pd.read_csv(csv_file_name)
@@ -126,17 +127,13 @@ def whitesoldiers(csv_file_name,trendfac=gtrendfac,resfac=gresfac,supfac=gsupfac
     report_date_n_days_ago = report_date - timedelta(days=trendfac)
     report_date = report_date.strftime("%Y-%m-%d")
     report_date_n_days_ago = report_date_n_days_ago.strftime("%Y-%m-%d")
-    cnt = 0
+
+    fulldata=pd.DataFrame()
     for stock in df['stock']:
         data = pseapi.get_stock_data(stock,report_date_n_days_ago,report_date)
         data = data.round(2)
-    
-        if cnt == 0:
-            fulldata = data
-            cnt = 1
-        else:
-            fulldata = fulldata.append(data,ignore_index = True)
-    
+        fulldata = fulldata.append(data,ignore_index = True)
+
     keys = pseapi.get_uniq_stock_keys(fulldata)
     filtered_df_score = get_whitesoldier_score(fulldata, keys,trendfac,resfac,supfac,pc_fac,volfac_1,volfac_2,volfac_3,netffac,pc_crit,volfac_crit,res_crit,sup_crit)
     filtered_keys = pseapi.get_uniq_stock_keys(filtered_df_score)
