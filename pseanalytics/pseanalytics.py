@@ -53,6 +53,7 @@ def get_ema(df):
     df['ema20'] = df.iloc[:,1].ewm(span=20,adjust=False).mean()
     df['ema26'] = df.iloc[:,1].ewm(span=26,adjust=False).mean()
     df['ema50'] = df.iloc[:,1].ewm(span=50,adjust=False).mean()
+    df['ema52'] = df.iloc[:,1].ewm(span=52,adjust=False).mean()
     df['ema100'] = df.iloc[:,1].ewm(span=100,adjust=False).mean()
     return df
 
