@@ -20,7 +20,7 @@ class whitesoldier:
         self.csv_file_name = csv_file_name
         # date to evaluate
         self.report_date = report_date
-        # number of days to sample for the trend 
+        # number of days to sample for the observation 
         self.trendfac = trendfac
         # adjust head factor relative to body 
         self.resfac = resfac
@@ -149,7 +149,7 @@ class macd_crossing:
         self.csv_file_name = csv_file_name
         # date to evaluate
         self.report_date = report_date
-        # number of days to sample for the trend 
+        # number of days to sample for the observation 
         self.trendfac = trendfac
 
     def get_stock_data(self):
@@ -173,10 +173,10 @@ class rsi_oversold:
         self.csv_file_name = csv_file_name
         # date to evaluate
         self.report_date = report_date
-        # number of days to sample for the trend 
+        # number of days to sample for the observation 
         self.trendfac = trendfac
         # oversold threshold
-        self.oversold = limit 
+        self.limit = limit 
 
     def get_stock_data(self):
         df = pd.read_csv(self.csv_file_name)
@@ -188,7 +188,7 @@ class rsi_oversold:
         for stock in df['stock']:
             data = pseapi.get_stock_data(stock,report_date_n_days_ago,self.report_date)
             data = data.round(2)
-            filtered_df = data.loc[data['rsi'] <= self.oversold]
+            filtered_df = data.loc[data['rsi'] <= self.limit]
             fulldata = fulldata.append(filtered_df,ignore_index = True)
 
         return fulldata
@@ -199,10 +199,10 @@ class rsi_overbought:
         self.csv_file_name = csv_file_name
         # date to evaluate
         self.report_date = report_date
-        # number of days to sample for the trend 
+        # number of days to sample for the observation 
         self.trendfac = trendfac
-        # oversold threshold
-        self.overbought = limit 
+        # overbought threshold
+        self.limit = limit 
 
     def get_stock_data(self):
         df = pd.read_csv(self.csv_file_name)
@@ -214,7 +214,54 @@ class rsi_overbought:
         for stock in df['stock']:
             data = pseapi.get_stock_data(stock,report_date_n_days_ago,self.report_date)
             data = data.round(2)
-            filtered_df = data.loc[data['rsi'] >= self.overbought]
+            filtered_df = data.loc[data['rsi'] >= self.limit]
             fulldata = fulldata.append(filtered_df,ignore_index = True)
+
+        return fulldata
+
+class ema52low:
+    def __init__(self,csv_file_name,report_date,trendfac = 0):
+        # list of stock code to evaluate
+        self.csv_file_name = csv_file_name
+        # date to evaluate
+        self.report_date = report_date
+        # number of days to sample for the observation 
+        self.trendfac = trendfac
+
+    def get_stock_data(self):
+        df = pd.read_csv(self.csv_file_name)
+        report_date = datetime.strptime(self.report_date, "%Y-%m-%d")
+        report_date_n_days_ago = report_date - timedelta(days=self.trendfac)
+        report_date = report_date.strftime("%Y-%m-%d")
+        report_date_n_days_ago = report_date_n_days_ago.strftime("%Y-%m-%d")
+        fulldata=pd.DataFrame()
+        for stock in df['stock']:
+            data = pseapi.get_stock_data(stock,report_date_n_days_ago,self.report_date)
+            data = data.round(2)
+            filtered_df = data.loc[data['close'] <= data['ema52']]
+            fulldata = fulldata.append(filtered_df,ignore_index = True)
+
+        return fulldata
+
+class marketsummary:
+    def __init__(self,csv_file_name,report_date,trendfac = 0):
+        # list of stock code to evaluate
+        self.csv_file_name = csv_file_name
+        # date to evaluate
+        self.report_date = report_date
+        # number of days to sample for the observation 
+        self.trendfac = trendfac
+
+    def get_stock_data(self):
+        df = pd.read_csv(self.csv_file_name)
+        report_date = datetime.strptime(self.report_date, "%Y-%m-%d")
+        report_date_n_days_ago = report_date - timedelta(days=self.trendfac)
+        report_date = report_date.strftime("%Y-%m-%d")
+        report_date_n_days_ago = report_date_n_days_ago.strftime("%Y-%m-%d")
+        fulldata=pd.DataFrame()
+        for stock in df['stock']:
+            data = pseapi.get_stock_data(stock,report_date_n_days_ago,self.report_date)
+            data = data.round(2)
+            fulldata = fulldata.append(data,ignore_index = True)
 
         return fulldata
