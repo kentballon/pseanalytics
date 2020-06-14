@@ -5,6 +5,7 @@
 ## Features
 1. Access historical stock data for up to the past year.
 2. Screen and identify potential stock trades based on stock indicators.
+3. Send email notifications using [yagmail](https://pypi.org/project/yagmail/) when thresholds against your watchlists are breached.
 
 ## Indicators
 1. close
