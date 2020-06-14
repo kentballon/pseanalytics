@@ -1,0 +1,2 @@
+stock,min,max
+MEG,4,5
