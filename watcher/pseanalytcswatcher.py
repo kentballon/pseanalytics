@@ -43,11 +43,11 @@ while True:
             stock = watchlist['stock'][ind]
             check = df.loc[df['stock'] == stock]
             if watchlist['min'][ind] is not None:
-                if (check['close'][0] <= watchlist['min'][ind]):
-                    min_breached.update({stock:[check['close'][0],watchlist['min'][ind]]})
+                if (check['close'][ind] <= watchlist['min'][ind]):
+                    min_breached.update({stock:[check['close'][ind],watchlist['min'][ind]]})
             if watchlist['max'][ind] is not None:
-                if (check['close'][0] >= watchlist['max'][ind]):
-                    max_breached.update({stock:[check['close'][0],watchlist['max'][ind]]})
+                if (check['close'][ind] >= watchlist['max'][ind]):
+                    max_breached.update({stock:[check['close'][ind],watchlist['max'][ind]]})
     
     contents = [
         "Minimum threshold breached:\n",
