@@ -25,7 +25,7 @@ def init_test():
 
 args = init_test()
 res = strategies.whitesoldier(args.l,args.d,args.s)
-df = res.get_stock_data()
+df,score = res.get_stock_data()
 
 print df
 print score
