@@ -9,6 +9,7 @@ from datetime import date, timedelta
 from pseanalytics import *
 username = "USERNAME@DOMAIN.COM"
 password = "PASSWORD"
+destination = "RECEIVE@DOMAIN.COM"
 delay = 300
 
 def init_test():
@@ -56,5 +57,6 @@ while True:
         str(max_breached)
     ]
     
-    yagmail.SMTP(username,password).send('kentballon@gmail.com', 'pseanalytics watcher', contents)
+    if (bool(min_breached) or bool(max_breached)):
+        yagmail.SMTP(username,password).send(destination, 'pseanalytics watcher', contents)
     time.sleep(delay)
