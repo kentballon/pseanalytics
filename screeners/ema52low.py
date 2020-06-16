@@ -19,7 +19,7 @@ def init_test():
     parser = argparse.ArgumentParser()
     parser.add_argument("-d", help="Report date", default=report_date.strftime("%Y-%m-%d"))
     parser.add_argument("-l", help="Stock code list", default="../lists/code_list_test.txt")
-    parser.add_argument("-s", help="Samples to evaulate", type=int, default=1)
+    parser.add_argument("-s", help="Samples to evaulate", type=int, default=0)
     # parse arguments
     args = parser.parse_args()
     return args
