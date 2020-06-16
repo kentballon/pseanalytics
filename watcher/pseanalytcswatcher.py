@@ -36,27 +36,31 @@ args = init_test()
 while True:
     res = strategies.marketsummary(args.l,args.d,args.s)
     df = res.get_stock_data()
-    
-    watchlist = pd.read_csv(args.l)
-    min_breached = {}
-    max_breached = {}
-    for ind in watchlist.index:
-            stock = watchlist['stock'][ind]
-            check = df.loc[df['stock'] == stock]
-            if watchlist['min'][ind] is not None:
-                if (check['close'][ind] <= watchlist['min'][ind]):
-                    min_breached.update({stock:[check['close'][ind],watchlist['min'][ind]]})
-            if watchlist['max'][ind] is not None:
-                if (check['close'][ind] >= watchlist['max'][ind]):
-                    max_breached.update({stock:[check['close'][ind],watchlist['max'][ind]]})
-    
-    contents = [
-        "Minimum threshold breached:\n",
-        str(min_breached),
-        "Maximum threshold breached:\n",
-        str(max_breached)
-    ]
-    
-    if (bool(min_breached) or bool(max_breached)):
-        yagmail.SMTP(username,password).send(destination, 'pseanalytics watcher', contents)
-    time.sleep(delay)
+   
+    if not df.empty: 
+        watchlist = pd.read_csv(args.l)
+        min_breached = {}
+        max_breached = {}
+        for ind in watchlist.index:
+                stock = watchlist['stock'][ind]
+                check = df.loc[df['stock'] == stock]
+                if watchlist['min'][ind] is not None:
+                    if (check['close'][ind] <= watchlist['min'][ind]):
+                        min_breached.update({stock:[check['close'][ind],watchlist['min'][ind]]})
+                if watchlist['max'][ind] is not None:
+                    if (check['close'][ind] >= watchlist['max'][ind]):
+                        max_breached.update({stock:[check['close'][ind],watchlist['max'][ind]]})
+        
+        contents = [
+            "Minimum threshold breached:\n",
+            str(min_breached),
+            "Maximum threshold breached:\n",
+            str(max_breached)
+        ]
+        
+        if (bool(min_breached) or bool(max_breached)):
+            yagmail.SMTP(username,password).send(destination, 'pseanalytics watcher', contents)
+        time.sleep(delay)
+    else:
+        print "No stock data for trading date."
+        break
