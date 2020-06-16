@@ -32,6 +32,10 @@ def init_test():
     return args
 
 args = init_test()
+min_breached = {}
+max_breached = {}
+email_min_breached = {}
+email_max_breached = {}
 
 while True:
     res = strategies.marketsummary(args.l,args.d,args.s)
@@ -39,8 +43,6 @@ while True:
    
     if not df.empty: 
         watchlist = pd.read_csv(args.l)
-        min_breached = {}
-        max_breached = {}
         for ind in watchlist.index:
                 stock = watchlist['stock'][ind]
                 check = df.loc[df['stock'] == stock]
@@ -57,9 +59,12 @@ while True:
             "Maximum threshold breached:\n",
             str(max_breached)
         ]
-        
+       
         if (bool(min_breached) or bool(max_breached)):
-            yagmail.SMTP(username,password).send(destination, 'pseanalytics watcher', contents)
+            if not ((email_min_breached == min_breached) and (email_max_breached == max_breached)):
+                yagmail.SMTP(username,password).send('kentballon@gmail.com', 'pseanalytics watcher', contents)
+                email_min_breached = copy.deepcopy(min_breached)
+                email_max_breached = copy.deepcopy(max_breached)
         time.sleep(delay)
     else:
         print "No stock data for trading date."
