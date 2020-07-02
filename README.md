@@ -26,3 +26,4 @@
 2. macd rossing
 3. rsi oversold and overbought
 4. three white soldiers
+5. marketvolume
