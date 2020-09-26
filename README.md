@@ -27,3 +27,4 @@
 3. rsi oversold and overbought
 4. three white soldiers
 5. marketvolume
+6. alma
