@@ -104,6 +104,33 @@ def get_candlestick(df):
     df['body'] = abs(df['close'] - df['open'])
     return df
 
+def get_alma(df):
+    # reference: https://github.com/darwinsys/Trading_Strategies/blob/master/ML/Features.py
+    # window
+    length = 20
+    # just some number (6.0 is useful)
+    sigma = 6
+    # sensisitivity (close to 1) or smoothness (close to 0)
+    offset = .85
+
+    asize = length - 1
+    m = np.floor(offset * asize)
+    s = length  / sigma
+    dss = 2 * s * s
+
+    alma = np.zeros(df.shape)
+    wtd_sum = np.zeros(df.shape)
+
+    for l in range(len(df)):
+        if l >= asize:
+            for i in range(length):
+                im = i - m
+                wtd = np.exp( -(im * im) / dss)
+                alma[l] += df[l - length + i] * wtd
+                wtd_sum[l] += wtd
+            alma[l] = alma[l] / wtd_sum[l]
+    return alma
+
 # Main function to pull stock data
 def get_stock_data(stock,start_date="2020-01-02",end_date="2020-01-02"):
 
@@ -156,9 +183,11 @@ def get_stock_data(stock,start_date="2020-01-02",end_date="2020-01-02"):
     df = get_macd(df)
     # calculate RSI
     df['rsi'] = get_rsi(df['close'],14)
+    # calculate ALMA
+    df['alma'] = get_alma(df['close'])
     # calculate Candlestick patterns
     df = get_candlestick(df) 
-     
+ 
     # limit dataframe to date range
     df = df.loc[start_date:end_date]
     # reset the index
